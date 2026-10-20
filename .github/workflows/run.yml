@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "*/10 * * * *"
   workflow_dispatch:
+    inputs:
+      send_latest:
+        description: "Send the latest tweet of each account now"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -23,6 +28,7 @@ jobs:
       - run: node index.js --once
         env:
           WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          SEND_LATEST: ${{ inputs.send_latest }}
       - name: Save seen tweets
         run: |
           git config user.name "github-actions"
