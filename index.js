@@ -10,7 +10,6 @@ const FEEDS = process.env.FEEDS ? process.env.FEEDS.split(/\s+/).filter(Boolean)
 const SEEN_FILE = path.join(dir, "seen.json");
 const INTERVAL_MIN = Number(process.env.INTERVAL_MIN || 5);
 const ONCE = process.argv.includes("--once");
-const LATEST = process.env.SEND_LATEST === "true";
 
 let seen = fs.existsSync(SEEN_FILE) ? JSON.parse(fs.readFileSync(SEEN_FILE, "utf8")) : {};
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -56,12 +55,6 @@ async function checkAll() {
       const items = parseItems(await res.text());
       const firstTime = !seen[feed];
       const known = new Set(seen[feed] || []);
-      if (LATEST && items.length) {
-        const last = items[items.length - 1];
-        if (await send(last.link)) console.log("sent latest:", last.link);
-        known.add(last.id);
-        await sleep(1000);
-      }
       for (const it of items) {
         if (known.has(it.id)) continue;
         if (!firstTime) {
